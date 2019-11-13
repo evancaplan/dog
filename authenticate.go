@@ -1,8 +1,6 @@
 package dog
 
 import (
-	"context"
-
 	"github.com/godo"
 	"golang.org/x/oauth2"
 )
@@ -18,7 +16,7 @@ func (c *Credentials) Token() (*oauth2.Token, error) {
 	return token, nil
 }
 
-func authenticate(token *oauth2.Token) (*godo.Client) {
+func Authenticate(token *oauth2.Token) (*godo.Client) {
 
 	tokenSource := &Credentials{
 		AccesToken: token.AccessToken,
