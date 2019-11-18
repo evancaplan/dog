@@ -12,6 +12,7 @@ type CreateDatabaseClusterRequest struct {
 	Name string
 	DatabaseType
 	Version string
+	DatabaseSize
 	Region 
 	NumNodes int
 	Tags []string
@@ -82,10 +83,12 @@ func(r Region) String() string {
 }
 
 // Droplet sizes
+
+// TODO remove this once Droplet is made
 type DropletSize int 
 
 const (
-	S_1CPU_1GB_RAM Size = iota
+	S_1CPU_1GB_RAM DropletSize = iota
 	S_1CPU_2GB_RAM
 	S_1CPU_3GB_RAM
 	S_2CPU_2GB_RAM
@@ -118,6 +121,38 @@ func (ds DropletSize) String() string {
 		"s-24vcpu-128gb",
 		"s-32vcpu-192gb",
 	}
+	if ds < S_1CPU_1GB_RAM || ds > S_32CPU_19GB_RAM {
+		return "That is not a droplet size"
+	}
+	return names[ds]
+}
+
+type DatabaseSize int 
+
+const (
+	DB_S_1CPU_1GB_RAM_10GB_STORAGE DatabaseSize = iota
+	DB_S_1CPU_2GB_RAM_25GB_STORAGE
+	DB_S_2CPU_4GB_RAM_38GB_STORAGE
+	DB_S_4CPU_8GB_RAM_115GB_STORAGE
+	DB_S_6CPU_16BG_RAM_270GB_STORAGE
+	DB_S_8CPU_32GB_RAM_580GB_STORAGE
+	DB_S_16CPU_64GB_RAM_1120GB_STORAGE
+)
+
+func (ds DatabaseSize) String() string {
+	names := [...]string {
+		"db-s-1vcpu-1gb",
+		"db-s-1vcpu-2gb",
+		"db-s-2vcpu-4gb",
+		"db-s-4vcpu-8gb",
+		"db-s-6vcpu-16gb",
+		"db-s-8vcpu-32gb",
+		"db-s-16vcpu-64gb",
+	}
+	if ds < DB_S_1CPU_1GB_RAM_10GB_STORAGE || ds > DB_S_16CPU_64GB_RAM_1120GB_STORAGE {
+		return "That is not a database size"
+	}
+	return names[ds]
 }
 
 func CreateDatabaseCluster(cdcr CreateDatabaseClusterRequest) *godo.Database{
@@ -126,7 +161,7 @@ func CreateDatabaseCluster(cdcr CreateDatabaseClusterRequest) *godo.Database{
 		Name: cdcr.Name,
 		EngineSlug: cdcr.DatabaseType.String(),
 		Version: cdcr.Version,
-		SizeSlug: "123",
+		SizeSlug: cdcr.DatabaseSize.String(),
 		NumNodes: cdcr.NumNodes,
 		Tags: cdcr.Tags,
 	}
