@@ -6,25 +6,24 @@ import (
 	"github.com/digitalocean/godo"
 )
 
-// Structs 
+// Structs
 
 type CreateDatabaseClusterRequest struct {
 	Name string
 	DatabaseType
 	Version string
 	DatabaseSize
-	Region 
+	Region
 	NumNodes int
-	Tags []string
-	Pat string
-
+	Tags     []string
+	Pat      string
 }
 
 type ResizeClusterRequest struct {
 	Id string
 	DatabaseSize
 	NumNodes int
-	Pat string
+	Pat      string
 }
 
 type MigrateRegionRequest struct {
@@ -34,25 +33,38 @@ type MigrateRegionRequest struct {
 }
 
 type UpdateMaintenanceWindowRequest struct {
-	Id string
-	Day string
+	Id   string
+	Day  string
 	Time string
-	Pat string
+	Pat  string
+}
+
+type AddNewDatabaseRequest struct {
+	Name      string
+	ClusterID string
+	Pat       string
+}
+
+type DeleteDatabaseRequest struct {
+	Name      string
+	ClusterID string
+	Pat       string
 }
 
 // Enums
 
 // Database types
+
 type DatabaseType int
 
-const(
+const (
 	PostGres DatabaseType = iota
 	Redis
 	MySQL
 )
 
 func (dbt DatabaseType) String() string {
-	names := [...]string {
+	names := [...]string{
 		"pg",
 		"redis",
 		"mysql",
@@ -81,13 +93,13 @@ const (
 	BLR1
 )
 
-func(r Region) String() string {
-	names := [...]string {
+func (r Region) String() string {
+	names := [...]string{
 		"nyc1",
 		"nyc2",
 		"nyc3",
 		"ams2",
-		"ams3", 
+		"ams3",
 		"sfo1",
 		"sfo2",
 		"sgp1",
@@ -105,7 +117,7 @@ func(r Region) String() string {
 // Droplet sizes
 
 // TODO remove this once Droplet is made
-type DropletSize int 
+type DropletSize int
 
 const (
 	S1Cpu1GbRAM DropletSize = iota
@@ -125,7 +137,7 @@ const (
 )
 
 func (ds DropletSize) String() string {
-	names := [...]string {
+	names := [...]string{
 		"s-1vcpu-1gb",
 		"s-1vcpu-2gb",
 		"s-1vcpu-3gb",
@@ -147,7 +159,7 @@ func (ds DropletSize) String() string {
 	return names[ds]
 }
 
-type DatabaseSize int 
+type DatabaseSize int
 
 const (
 	DbS1Cpu1GbRAM10GbStorage DatabaseSize = iota
@@ -160,7 +172,7 @@ const (
 )
 
 func (ds DatabaseSize) String() string {
-	names := [...]string {
+	names := [...]string{
 		"db-s-1vcpu-1gb",
 		"db-s-1vcpu-2gb",
 		"db-s-2vcpu-4gb",
@@ -175,21 +187,21 @@ func (ds DatabaseSize) String() string {
 	return names[ds]
 }
 
-func CreateDatabaseCluster(cdcr CreateDatabaseClusterRequest) *godo.Database{
-	
-	dcr := &godo.DatabaseCreateRequest {
-		Name: cdcr.Name,
+func CreateDatabaseCluster(cdcr CreateDatabaseClusterRequest) *godo.Database {
+
+	dcr := &godo.DatabaseCreateRequest{
+		Name:       cdcr.Name,
 		EngineSlug: cdcr.DatabaseType.String(),
-		Version: cdcr.Version,
-		SizeSlug: cdcr.DatabaseSize.String(),
-		NumNodes: cdcr.NumNodes,
-		Tags: cdcr.Tags,
+		Version:    cdcr.Version,
+		SizeSlug:   cdcr.DatabaseSize.String(),
+		NumNodes:   cdcr.NumNodes,
+		Tags:       cdcr.Tags,
 	}
 
 	c := Authenticate(cdcr.Pat)
 	ctx := context.TODO()
 
-	cluster, _, err := c.Databases.Create(ctx, dcr) 
+	cluster, _, err := c.Databases.Create(ctx, dcr)
 
 	if err != nil {
 		panic("aunt jemima")
@@ -199,7 +211,7 @@ func CreateDatabaseCluster(cdcr CreateDatabaseClusterRequest) *godo.Database{
 }
 
 func GetDatabaseClusterById(id string, pat string) *godo.Database {
-	
+
 	c := Authenticate(pat)
 	ctx := context.TODO()
 
@@ -212,9 +224,8 @@ func GetDatabaseClusterById(id string, pat string) *godo.Database {
 	return cluster
 }
 
+func GeAllDatabaseClusters(page int, numberPerPage int, pat string) *[]godo.Database {
 
-func GeAllDatabaseClusters(page int, numberPerPage int, pat string) *[]godo.Database{
-	
 	// map user input of page and size to godo ListOptions object
 	opt := &godo.ListOptions{
 		Page:    page,
@@ -233,7 +244,7 @@ func GeAllDatabaseClusters(page int, numberPerPage int, pat string) *[]godo.Data
 }
 
 func ResizeCluster(rcr ResizeClusterRequest) {
-	
+
 	resize := &godo.DatabaseResizeRequest{
 		SizeSlug: rcr.DatabaseSize.String(),
 		NumNodes: rcr.NumNodes,
@@ -251,7 +262,7 @@ func ResizeCluster(rcr ResizeClusterRequest) {
 
 func MigrateToNewRegion(mrr MigrateRegionRequest) {
 
-	migrate := &godo.DatabaseMigrateRequest {
+	migrate := &godo.DatabaseMigrateRequest{
 		Region: mrr.Region.String(),
 	}
 
@@ -266,9 +277,9 @@ func MigrateToNewRegion(mrr MigrateRegionRequest) {
 }
 
 func ConfigureMaintenanceWindow(umw UpdateMaintenanceWindowRequest) {
-	
+
 	configure := &godo.DatabaseUpdateMaintenanceRequest{
-		Day: umw.Day,
+		Day:  umw.Day,
 		Hour: umw.Time,
 	}
 
@@ -281,4 +292,45 @@ func ConfigureMaintenanceWindow(umw UpdateMaintenanceWindowRequest) {
 
 	}
 
+}
+
+func addDatabaseToCluster(and AddNewDatabaseRequest) *godo.DatabaseDB {
+
+	createReq := &godo.DatabaseCreateDBRequest{
+		Name: and.Name,
+	}
+
+	c := Authenticate(and.Pat)
+	ctx := context.TODO()
+
+	db, _, err := c.Databases.CreateDB(ctx, and.ClusterId, createReq)
+
+	if err != nil {
+
+	}
+	return db
+}
+
+func findAllDatabasesInCluster(pat string, clusterID string) *[]godo.DatabaseDB {
+
+	c := Authenticate(pat)
+	ctx := context.TODO()
+
+	dbs, _, err := c.Databases.ListDBs(ctx, clusterID, nil)
+	if err != nil {
+
+	}
+	return &dbs
+}
+
+func deleteDatabaseInCluster(dr DeleteDatabaseRequest) {
+
+	c := Authenticate(dr.Pat)
+	ctx := context.TODO()
+
+	_, err := c.Databases.DeleteDB(ctx, dr.ClusterID, dr.Name)
+
+	if err != nil{
+		
+	}
 }
