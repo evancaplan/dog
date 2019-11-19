@@ -11,7 +11,7 @@ type GetAllDropletsRequest struct {
 	PerPage int
 	Pat     string
 }
-
+ 
 func GetAllDroplets(gar GetAllDropletsRequest) *[]godo.Droplet {
 
 	opt := &godo.ListOptions{
