@@ -20,6 +20,26 @@ type CreateDatabaseClusterRequest struct {
 
 }
 
+type ResizeClusterRequest struct {
+	Id string
+	DatabaseSize
+	NumNodes int
+	Pat string
+}
+
+type MigrateRegionRequest struct {
+	Id string
+	Region
+	Pat string
+}
+
+type UpdateMaintenanceWindowRequest struct {
+	Id string
+	Day string
+	Time string
+	Pat string
+}
+
 // Enums
 
 // Database types
@@ -178,8 +198,22 @@ func CreateDatabaseCluster(cdcr CreateDatabaseClusterRequest) *godo.Database{
 	return cluster
 }
 
+func GetDatabaseClusterById(id string, pat string) *godo.Database {
+	
+	c := Authenticate(pat)
+	ctx := context.TODO()
 
-func GeAlltDatabaseClusters(page int, numberPerPage int, pat string) *[]godo.Database{
+	cluster, _, err := c.Databases.Get(ctx, id)
+
+	if err != nil {
+
+	}
+
+	return cluster
+}
+
+
+func GeAllDatabaseClusters(page int, numberPerPage int, pat string) *[]godo.Database{
 	
 	// map user input of page and size to godo ListOptions object
 	opt := &godo.ListOptions{
@@ -198,4 +232,53 @@ func GeAlltDatabaseClusters(page int, numberPerPage int, pat string) *[]godo.Dat
 	return &clusters
 }
 
+func ResizeCluster(rcr ResizeClusterRequest) {
+	
+	resize := &godo.DatabaseResizeRequest{
+		SizeSlug: rcr.DatabaseSize.String(),
+		NumNodes: rcr.NumNodes,
+	}
 
+	c := Authenticate(rcr.Pat)
+	ctx := context.TODO()
+
+	_, err := c.Databases.Resize(ctx, rcr.Id, resize)
+
+	if err != nil {
+
+	}
+}
+
+func MigrateToNewRegion(mrr MigrateRegionRequest) {
+
+	migrate := &godo.DatabaseMigrateRequest {
+		Region: mrr.Region.String(),
+	}
+
+	c := Authenticate(mrr.Pat)
+	ctx := context.TODO()
+
+	_, err := c.Databases.Migrate(ctx, mrr.Id, migrate)
+
+	if err != nil {
+
+	}
+}
+
+func ConfigureMaintenanceWindow(umw UpdateMaintenanceWindowRequest) {
+	
+	configure := &godo.DatabaseUpdateMaintenanceRequest{
+		Day: umw.Day,
+		Hour: umw.Time,
+	}
+
+	c := Authenticate(umw.Pat)
+	ctx := context.TODO()
+
+	_, err := c.Databases.UpdateMaintenance(ctx, umw.Id, configure)
+
+	if err != nil {
+
+	}
+
+}
