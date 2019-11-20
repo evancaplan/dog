@@ -189,7 +189,7 @@ func (ds DatabaseSize) String() string {
 
 func CreateDatabaseCluster(cdcr CreateDatabaseClusterRequest) *godo.Database {
 
-	dcr := &godo.DatabaseCreateRequest{
+	create := &godo.DatabaseCreateRequest{
 		Name:       cdcr.Name,
 		EngineSlug: cdcr.DatabaseType.String(),
 		Version:    cdcr.Version,
@@ -201,7 +201,7 @@ func CreateDatabaseCluster(cdcr CreateDatabaseClusterRequest) *godo.Database {
 	c := Authenticate(cdcr.Pat)
 	ctx := context.TODO()
 
-	cluster, _, err := c.Databases.Create(ctx, dcr)
+	cluster, _, err := c.Databases.Create(ctx, create)
 
 	if err != nil {
 		panic("aunt jemima")
@@ -296,14 +296,14 @@ func ConfigureMaintenanceWindow(umw UpdateMaintenanceWindowRequest) {
 
 func addDatabaseToCluster(and AddNewDatabaseRequest) *godo.DatabaseDB {
 
-	createReq := &godo.DatabaseCreateDBRequest{
+	create := &godo.DatabaseCreateDBRequest{
 		Name: and.Name,
 	}
 
 	c := Authenticate(and.Pat)
 	ctx := context.TODO()
 
-	db, _, err := c.Databases.CreateDB(ctx, and.ClusterId, createReq)
+	db, _, err := c.Databases.CreateDB(ctx, and.ClusterID, create)
 
 	if err != nil {
 
@@ -331,6 +331,6 @@ func deleteDatabaseInCluster(dr DeleteDatabaseRequest) {
 	_, err := c.Databases.DeleteDB(ctx, dr.ClusterID, dr.Name)
 
 	if err != nil{
-		
+
 	}
 }
