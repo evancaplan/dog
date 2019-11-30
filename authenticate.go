@@ -1,9 +1,7 @@
 package dog
 
 import (
-	"context"
-
-	"github.com/godo"
+	"github.com/digitalocean/godo"
 	"golang.org/x/oauth2"
 )
 
@@ -18,10 +16,10 @@ func (c *Credentials) Token() (*oauth2.Token, error) {
 	return token, nil
 }
 
-func authenticate(token *oauth2.Token) (*godo.Client) {
+func Authenticate(pat string) *godo.Client {
 
 	tokenSource := &Credentials{
-		AccesToken: token.AccessToken,
+		AccesToken: pat,
 	}
 
 	oauthClient := oauth2.NewClient(oauth2.NoContext, tokenSource)
@@ -29,3 +27,5 @@ func authenticate(token *oauth2.Token) (*godo.Client) {
 
 	return client
 }
+
+
