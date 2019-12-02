@@ -30,9 +30,21 @@ type GetAllDropletsRequest struct {
 	Pat     string
 }
 
-type FindDropletRequest struct {
+type FindDropletByIDRequest struct {
 	ID  int
 	Pat string
+}
+
+type FindDropletsByTagRequest struct {
+	Tag     string
+	Page    int
+	PerPage int
+	Pat     string
+}
+
+type DeleteDropletRequest struct {
+	ID int
+	Pat
 }
 
 func GetAllDroplets(gar GetAllDropletsRequest) (*[]godo.Droplet, error) {
@@ -53,7 +65,7 @@ func GetAllDroplets(gar GetAllDropletsRequest) (*[]godo.Droplet, error) {
 	return &droplets, nil
 }
 
-func GetDropletById(fdr FindDropletRequest) (*godo.Droplet, error) {
+func GetDropletById(fdr FindDropletByIDRequest) (*godo.Droplet, error) {
 
 	c := Authenticate(fdr.Pat)
 	ctx := context.TODO()
@@ -64,6 +76,24 @@ func GetDropletById(fdr FindDropletRequest) (*godo.Droplet, error) {
 	}
 
 	return droplet, nil
+}
+
+func GetDropletsByTag(fdr FindDropletsByTagRequest) (*[]godo.Droplet, error) {
+
+	c := Authenticate(fdr.Pat)
+	ctx := context.TODO()
+
+	opt := &godo.ListOptions{
+		Page:    fdr.Page,
+		PerPage: fdr.PerPage,
+	}
+
+	droplets, _, err := c.Droplets.ListByTag(ctx, fdr.Tag, opt)
+	if err != nil {
+		return nil, errors.New("Droplets with Tag: " + fdr.Tag + ", weer not found. Godo error: " + err.Error())
+	}
+
+	return &droplets, nil
 }
 
 func CreateDroplet(cdr CreateDropletRequest) (*godo.Droplet, error) {
@@ -116,4 +146,16 @@ func createVolumes(volumes []string) []godo.DropletCreateVolume {
 		godoVolumes = append(godoVolumes, volume)
 	}
 	return godoVolumes
+}
+
+func DeleteDroplet(ddr DeleteDropletRequest) error {
+	
+	c := Authenticate(ddr.Pat)
+	ctx := context.TODO()
+
+	_, err := client.Droplets.Delete(ctx,ddr.ID)
+	if err != nil {
+		return errors.New("Unable to delete droplet with ID: " + ddr.ID)
+	}
+	return nil
 }
