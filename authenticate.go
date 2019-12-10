@@ -1,4 +1,4 @@
-package dog
+package authenticate
 
 import (
 	"github.com/digitalocean/godo"

@@ -1,8 +1,9 @@
-package dog_test
+package database_test
 
 import (
-	"github.com/digitalocean/godo"
 	"testing"
+
+	"github.com/digitalocean/godo"
 
 	"gitlab.com/bwss/dog"
 )
@@ -10,9 +11,22 @@ import (
 const TestPAT string = "TestPAT"
 
 func TestCreateDatabaseCluster(t *testing.T) {
-	testReq := dog.C{
-		Pat: TestPAT,
+
+	expectedDBCluster := &godo.Database{}
+	testReq := dog.CreateDatabaseClusterRequest{
+		Name:         "Test Request",
+		DatabaseType: dog.MySQL,
+		Version:      "Test Version",
+		DatabaseSize: dog.DbS1Cpu1GbRAM10GbStorage,
+		Region:       dog.FRA1,
+		NumNodes:     1,
+		Tags:         nil,
+		Pat:          TestPAT,
 	}
 
-	reti
+	returnedDBCluster, _ := dog.CreateDatabaseCluster(testReq)
+
+	if &expectedDBCluster != &returnedDBCluster {
+		t.Errorf(returnedDBCluster.Name)
+	}
 }

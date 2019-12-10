@@ -44,7 +44,50 @@ type FindDropletsByTagRequest struct {
 
 type DeleteDropletRequest struct {
 	ID int
-	Pat
+	Pat string
+}
+
+// Droplet sizes
+type DropletSize int
+
+const (
+	S1Cpu1GbRAM DropletSize = iota
+	S1Cpu2GbRAM
+	S1Cpu3GbRAM
+	S2Cpu2GbRAM
+	S3Cpu1GbRAM
+	S2Cpu4GbRAM
+	S4Cpu8GbRAM
+	S6Cpu16GbRAM
+	S8Cpu32GbRAM
+	S12Cpu47GbRAM
+	S16Cpu64GbRAM
+	S20Cpu96GbRAM
+	S24Cpu128GbRAM
+	S32Cpu19GbRAM
+)
+
+func (ds DropletSize) String() string {
+	names := [...]string{
+		"s-1vcpu-1gb",
+		"s-1vcpu-2gb",
+		"s-1vcpu-3gb",
+		"s-2vcpu-2gb",
+		"s-3vcpu-1gb",
+		"s-2vcpu-4gb",
+		"s-4vcpu-8gb",
+		"s-6vcpu-16gb",
+		"s-8vcpu-32gb",
+		"s-12vcpu-48gb",
+		"s-16vcpu-64gb",
+		"s-20vcpu-96gb",
+		"s-24vcpu-128gb",
+		"s-32vcpu-192gb",
+	}
+	if ds < S1Cpu1GbRAM || ds > S32Cpu19GbRAM {
+		return "That is not a droplet size"
+	}
+	return names[ds]
 }
 
 func GetAllDroplets(gar GetAllDropletsRequest) (*[]godo.Droplet, error) {
@@ -153,9 +196,9 @@ func DeleteDroplet(ddr DeleteDropletRequest) error {
 	c := Authenticate(ddr.Pat)
 	ctx := context.TODO()
 
-	_, err := client.Droplets.Delete(ctx,ddr.ID)
+	_, err := c.Droplets.Delete(ctx,ddr.ID)
 	if err != nil {
-		return errors.New("Unable to delete droplet with ID: " + ddr.ID)
+		return errors.New("Unable to delete droplet with ID: " + strconv.Itoa(ddr.ID))
 	}
 	return nil
 }
