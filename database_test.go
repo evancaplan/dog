@@ -90,4 +90,5 @@ func TestCreateDatabaseCluster(t *testing.T) {
 	if &expectedDBCluster != &returnedDBCluster {
 		t.Errorf(returnedDBCluster.Name)
 	}
+	}
 }
