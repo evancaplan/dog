@@ -1,4 +1,4 @@
-package database
+package dog
 
 import (
 	"context"
@@ -143,18 +143,30 @@ func (ds DatabaseSize) String() string {
 	return names[ds]
 }
 
-type GodoClient interface {
-	Create(struct{})(*struct{}, error),
-	GetById(id string, pat string)(*struct{}, error)
+type DatabaseClient interface {
+	Get(context.Context, string) (*godo.Database, *godo.Response, error)
+	Create(context.Context, *godo.DatabaseCreateRequest) (*godo.Database, *godo.Response, error)
+	List(id string, pat string)(*struct{}, error)
 	GetAll(page int, numberPerPage int, pat string) (*[]struct{}, error)
+	Resize(context.Context, string, *godo.DatabaseResizeRequest) (*godo.Response, error)
+	Migrate(context.Context, string, *godo.DatabaseMigrateRequest) (*godo.Response, error)
+	UpdateMaintenance(context.Context, string, *godo.DatabaseUpdateMaintenanceRequest) (*godo.Response, error)
+	ListDBs(context.Context, string, *godo.ListOptions) ([]DatabaseDB, *godo.Response, error)
+	CreateDB(context.Context, string, *godo.DatabaseCreateDBRequest) (*godo.DatabaseDB, *godo.Response, error)
+	GetDB(context.Context, string, string) (*godo.DatabaseDB, *godo.Response, error)
+	DeleteDB(context.Context, string, string) (*godo.Response, error)
 }
 
-type DatabaseClusterClient struct{
-	Pat string
-	client GodoClient
+type Database struct{
+	client DatabaseClient
 }
 
-func(dbcc DatabaseClusterClient) Create(cdcr CreateDatabaseClusterRequest) (*godo.Datasbase, error) {
+func New(pat string) Database {
+	client := Authenticate(pat)
+	return Database{client.Databases}
+}
+
+func(db *Database) Create(cdcr CreateDatabaseClusterRequest) (*godo.Datasbase, error) {
 	
 	// create new godo DatabaseCreateRequest
 	create := &godo.DatabaseCreateRequest{
@@ -167,11 +179,10 @@ func(dbcc DatabaseClusterClient) Create(cdcr CreateDatabaseClusterRequest) (*god
 	}
 
 	// generate new client and create empty context
-	c := Authenticate(dbcc.Pat)
 	ctx := context.TODO()
 
 	// create new database cluster
-	cluster, _, err := c.Databases.Create(ctx, create)
+	cluster, _, err := db.client.Create(ctx, create)
 	if err != nil {
 		return nil, errors.New("Unable to create database cluster. Godo error: " + err.Error())
 	}
@@ -179,14 +190,13 @@ func(dbcc DatabaseClusterClient) Create(cdcr CreateDatabaseClusterRequest) (*god
 	return cluster, nil
 }
 
-func(dbcc DatabaseClusterClient) GetById(id string) (*godo.Database, error) {
+func(db *DatabaseCluster) GetById(id string) (*godo.Database, error) {
 
-	// generate new client and create empty context
-	c := Authenticate(dbcc.Pat)
+	// generate empty context
 	ctx := context.TODO()
 
 	// find database cluster by id
-	cluster, _, err := c.Databases.Get(ctx, id)
+	cluster, _, err := db.client.Get(ctx, id)
 	if err != nil {
 		return nil, errors.New("Database cluster with id: " + id + " not found. Godo error: " + err.Error())
 	}
@@ -194,7 +204,7 @@ func(dbcc DatabaseClusterClient) GetById(id string) (*godo.Database, error) {
 	return cluster, nil
 }
 
-func(dbcc DatabaseClusterClient) GeAll(page int, numberPerPage int) (*[]godo.Database, error) {
+func(db *Database) GeAll(page int, numberPerPage int) (*[]godo.Database, error) {
 
 	// create new godo ListOptions (page request)
 	opt := &godo.ListOptions{
@@ -203,11 +213,10 @@ func(dbcc DatabaseClusterClient) GeAll(page int, numberPerPage int) (*[]godo.Dat
 	}
 
 	// generate new client and create empty context
-	c := Authenticate(dbcc.Pat)
 	ctx := context.TODO()
 
 	// find all database clusters
-	clusters, _, err := c.Databases.List(ctx, opt)
+	clusters, _, err := db.client.List(ctx, opt)
 	if err != nil {
 		return nil, errors.New("Unable to get all database clusters. Godo error: " + err.Error())
 	}
@@ -215,7 +224,7 @@ func(dbcc DatabaseClusterClient) GeAll(page int, numberPerPage int) (*[]godo.Dat
 	return &clusters, nil
 }
 
-func ResizeCluster(rcr ResizeClusterRequest) error {
+func(db *Database) ResizeCluster(rcr ResizeClusterRequest) error {
 	
 	// create new godo ResizeDatabaseRequest
 	resize := &godo.DatabaseResizeRequest{
@@ -223,12 +232,11 @@ func ResizeCluster(rcr ResizeClusterRequest) error {
 		NumNodes: rcr.NumNodes,
 	}
 
-	// generate new client and create empty context
-	c := Authenticate(rcr.Pat)
+	// generate empty context
 	ctx := context.TODO()
 
 	// send resize request
-	_, err := c.Databases.Resize(ctx, rcr.Id, resize)
+	_, err := db.client.Resize(ctx, rcr.Id, resize)
 	if err != nil {
 		return errors.New("Unable to resize cluster" + rcr.Id + ". Godo error: " + err.Error())
 	}
@@ -236,7 +244,7 @@ func ResizeCluster(rcr ResizeClusterRequest) error {
 	return nil
 }
 
-func MigrateToNewRegion(mrr MigrateRegionRequest) error {
+func(db *Database) MigrateToNewRegion(mrr MigrateRegionRequest) error {
 
 	// create new godo DatabaseMigrateRequest
 	migrate := &godo.DatabaseMigrateRequest{
@@ -248,7 +256,7 @@ func MigrateToNewRegion(mrr MigrateRegionRequest) error {
 	ctx := context.TODO()
 
 	// send migrate request
-	_, err := c.Databases.Migrate(ctx, mrr.Id, migrate)
+	_, err := db.client.Migrate(ctx, mrr.Id, migrate)
 	if err != nil {
 		return errors.New("Unable to migrate to a new region. Godo error: " + err.Error())
 	}
@@ -256,7 +264,7 @@ func MigrateToNewRegion(mrr MigrateRegionRequest) error {
 	return nil
 }
 
-func ConfigureMaintenanceWindow(umw UpdateMaintenanceWindowRequest) error {
+func(db *Database) ConfigureMaintenanceWindow(umw UpdateMaintenanceWindowRequest) error {
 
 	// create new godo DatabaseUpdateMaintenanceRequest
 	configure := &godo.DatabaseUpdateMaintenanceRequest{
@@ -264,12 +272,11 @@ func ConfigureMaintenanceWindow(umw UpdateMaintenanceWindowRequest) error {
 		Hour: umw.Time,
 	}
 	
-	// generate new client and create empty context
-	c := Authenticate(umw.Pat)
+	// create empty context
 	ctx := context.TODO()
 
 	// send update maintanence window request
-	_, err := c.Databases.UpdateMaintenance(ctx, umw.Id, configure)
+	_, err := db.client.UpdateMaintenance(ctx, umw.Id, configure)
 	if err != nil {
 		return errors.New("Unable to configure maintenance window for database cluster." + umw.Id + " Godo error: " + err.Error())
 	}
@@ -277,19 +284,18 @@ func ConfigureMaintenanceWindow(umw UpdateMaintenanceWindowRequest) error {
 	return nil
 }
 
-func addDatabaseToCluster(and AddNewDatabaseRequest) (*godo.DatabaseDB, error) {
+func(db *Database) addDatabaseToCluster(and AddNewDatabaseRequest) (*godo.DatabaseDB, error) {
 
 	// create new godo DatabaseCreateDBRequest
 	create := &godo.DatabaseCreateDBRequest{
 		Name: and.Name,
 	}
 
-	// generate new client and create empty context
-	c := Authenticate(and.Pat)
+	// create empty context
 	ctx := context.TODO()
 
 	// add database to cluster
-	db, _, err := c.Databases.CreateDB(ctx, and.ClusterID, create)
+	db, _, err := db.client.CreateDB(ctx, and.ClusterID, create)
 	if err != nil {
 		return nil, errors.New("Unable to add database to cluster. Godo error: " + err.Error())
 	}
@@ -297,13 +303,15 @@ func addDatabaseToCluster(and AddNewDatabaseRequest) (*godo.DatabaseDB, error) {
 	return db, nil
 }
 
-func findAllDatabasesInCluster(pat string, clusterID string) (*[]godo.DatabaseDB, error) {
-	// generate new client and create empty context
-	c := Authenticate(pat)
+func(db *Database) findDatabaseInClusterById()
+
+func(db *Database) findAllDatabasesInCluster(pat string, clusterID string) (*[]godo.DatabaseDB, error) {
+
+	// create empty context
 	ctx := context.TODO()
 
 	// find all databases by cluser id
-	dbs, _, err := c.Databases.ListDBs(ctx, clusterID, nil)
+	dbs, _, err := db.client.ListDBs(ctx, clusterID, nil)
 	if err != nil {
 		return nil, errors.New("Unable to find all databases in cluster: " + clusterID + " . Godo error:  " + err.Error())
 	}
@@ -311,14 +319,13 @@ func findAllDatabasesInCluster(pat string, clusterID string) (*[]godo.DatabaseDB
 	return &dbs, nil
 }
 
-func deleteDatabaseInCluster(dr DeleteDatabaseRequest) error {
+func(db *Database) deleteDatabaseInCluster(dr DeleteDatabaseRequest) error {
 	
-	// generate new client and create empty context
-	c := Authenticate(dr.Pat)
+	// create empty context
 	ctx := context.TODO()
 
 	// send delete database request
-	_, err := c.Databases.DeleteDB(ctx, dr.ClusterID, dr.Name)
+	_, err := db.client.DeleteDB(ctx, dr.ClusterID, dr.Name)
 	if err != nil {
 		return errors.New("Unable to delete database: " + dr.Name + " . Godo error: " + err.Error())
 	}

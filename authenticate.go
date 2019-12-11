@@ -1,4 +1,4 @@
-package authenticate
+package dog
 
 import (
 	"github.com/digitalocean/godo"
@@ -27,5 +27,3 @@ func Authenticate(pat string) *godo.Client {
 
 	return client
 }
-
-
