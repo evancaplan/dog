@@ -27,5 +27,3 @@ func Authenticate(pat string) *godo.Client {
 
 	return client
 }
-
-
