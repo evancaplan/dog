@@ -102,10 +102,11 @@ var TestCreateDatabaseRequest = CreateDatabaseRequest{
 	ClusterID: "234234-1234BC24",
 }
 
-var TestDeleteDatabaseRequest = DeleteDatabaseRequest {
-	Name: "Test Database Name",
+var TestDeleteDatabaseRequest = DeleteDatabaseRequest{
+	Name:      "Test Database Name",
 	ClusterID: "123-4567",
 }
+
 func TestGetById(t *testing.T) {
 
 	dbClient := NewDBC(TestPAT)
@@ -117,9 +118,11 @@ func TestGetById(t *testing.T) {
 	if !reflect.DeepEqual(&expected, returned) {
 		t.Errorf("expected %+v\n returned %+v\n", expected, returned)
 	}
+
 }
 
 func TestGetAll(t *testing.T) {
+
 	dbClient := NewDBC(TestPAT)
 	dbClient.client = &MockGodoDatabaseSvc{}
 	expected := ExpectedDBs
@@ -129,6 +132,7 @@ func TestGetAll(t *testing.T) {
 	if !reflect.DeepEqual(expected, returned) {
 		t.Errorf("expected %+v\n returned %+v\n", expected, returned)
 	}
+
 }
 
 func TestCreateDatabaseCluster(t *testing.T) {
@@ -174,6 +178,7 @@ func TestMigrateToNewRegion(t *testing.T) {
 			t.Errorf("expected: %s returned: %s", expectedError, returnedError)
 		}
 	})
+
 }
 
 func TestConfigureMaintenanceWindow(t *testing.T) {
@@ -189,6 +194,7 @@ func TestConfigureMaintenanceWindow(t *testing.T) {
 			t.Errorf("expected: %s returned: %s", expectedError, returnedError)
 		}
 	})
+
 }
 
 func TestAddDatabaseToCluster(t *testing.T) {
@@ -205,6 +211,7 @@ func TestAddDatabaseToCluster(t *testing.T) {
 }
 
 func TestFindAllDatabasesInCluster(t *testing.T) {
+
 	dbClient := NewDBC(TestPAT)
 	dbClient.client = &MockGodoDatabaseSvc{}
 
@@ -213,6 +220,7 @@ func TestFindAllDatabasesInCluster(t *testing.T) {
 	if !reflect.DeepEqual(expected, returned) {
 		t.Errorf("expected: %+v\n returned: %+v\n", expected, returned)
 	}
+
 }
 
 func TestDeleteDatabaseInCluster(t *testing.T) {
