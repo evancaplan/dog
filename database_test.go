@@ -70,7 +70,7 @@ var ExpectedDatabaseDBs = []godo.DatabaseDB{ExpectedDatabaseDB}
 
 var TestError = "test error"
 
-var TestCreateDatabeClusterRequest = CreateDatabaseClusterRequest{
+var TestCreateDatabaseClusterRequest = CreateDatabaseClusterRequest{
 	Name:         "Test Request",
 	DatabaseType: MySQL,
 	Version:      "Test Version",
@@ -139,7 +139,7 @@ func TestCreateDatabaseCluster(t *testing.T) {
 	dbClient.client = &MockGodoDatabaseSvc{}
 	expected := ExpectedDB
 
-	returned, _ := dbClient.Create(TestCreateDatabeClusterRequest)
+	returned, _ := dbClient.Create(TestCreateDatabaseClusterRequest)
 	if !reflect.DeepEqual(&expected, returned) {
 		t.Errorf("expected %+v\n returned %+v\n", expected, returned)
 	}
