@@ -111,10 +111,9 @@ func TestGetById(t *testing.T) {
 
 	dbClient := NewDBC(TestPAT)
 	dbClient.client = &MockGodoDatabaseSvc{}
+	
 	expected := ExpectedDB
-
 	returned, _ := dbClient.GetById("1")
-
 	if !reflect.DeepEqual(&expected, returned) {
 		t.Errorf("expected %+v\n returned %+v\n", expected, returned)
 	}
@@ -125,10 +124,9 @@ func TestGetAll(t *testing.T) {
 
 	dbClient := NewDBC(TestPAT)
 	dbClient.client = &MockGodoDatabaseSvc{}
+	
 	expected := ExpectedDBs
-
 	returned, _ := dbClient.GetAll(1, 5)
-
 	if !reflect.DeepEqual(expected, returned) {
 		t.Errorf("expected %+v\n returned %+v\n", expected, returned)
 	}
@@ -142,7 +140,6 @@ func TestCreateDatabaseCluster(t *testing.T) {
 	expected := ExpectedDB
 
 	returned, _ := dbClient.Create(TestCreateDatabeClusterRequest)
-
 	if !reflect.DeepEqual(&expected, returned) {
 		t.Errorf("expected %+v\n returned %+v\n", expected, returned)
 	}
@@ -157,7 +154,6 @@ func TestResizeCluster(t *testing.T) {
 
 		expectedError := "Unable to resize cluster " + TestResizeClusterRequest.Id + ". Godo error: " + TestError
 		returnedError := dbClient.ResizeCluster(TestResizeClusterRequest).Error()
-
 		if returnedError != expectedError {
 			t.Errorf("expected: %s returned: %s", expectedError, returnedError)
 		}
@@ -173,7 +169,6 @@ func TestMigrateToNewRegion(t *testing.T) {
 
 		expectedError := "Unable to migrate to new region. Godo error: test error"
 		returnedError := dbClient.MigrateToNewRegion(TestMigrateNewRegionRequest).Error()
-
 		if returnedError != expectedError {
 			t.Errorf("expected: %s returned: %s", expectedError, returnedError)
 		}
@@ -189,7 +184,6 @@ func TestConfigureMaintenanceWindow(t *testing.T) {
 
 		expectedError := "Unable to configure maintenance window for database cluster." + TestUpdateMaintenanceWindowRequest.Id + " Godo error: " + TestError
 		returnedError := dbClient.ConfigureMaintenanceWindow(TestUpdateMaintenanceWindowRequest).Error()
-
 		if expectedError != returnedError {
 			t.Errorf("expected: %s returned: %s", expectedError, returnedError)
 		}
