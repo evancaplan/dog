@@ -5,6 +5,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type Authenticator interface {
+	Authenticate(pat string) *godo.Client
+}
+
 type Credentials struct {
 	AccesToken string
 }
