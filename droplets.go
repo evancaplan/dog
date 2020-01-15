@@ -23,7 +23,7 @@ type CreateDropletRequest struct {
 	VPCUUID           string
 }
 
-type GetAllDropletsRequest struct {
+type FindAllDropletsRequest struct {
 	Page    int
 	PerPage int
 }
@@ -97,16 +97,16 @@ type Droplet struct {
 	client DropletClient
 }
 
-func NewDc(pat string) Droplet {
+func NewDC(pat string) Droplet {
 	client := Authenticate(pat)
 	return Droplet{client: client.Droplets}
 }
 
-func (d *Droplet) GetAllDroplets(gar GetAllDropletsRequest) (*[]godo.Droplet, error) {
+func (d *Droplet) GetAllDroplets(far FindAllDropletsRequest) ([]godo.Droplet, error) {
 
 	opt := &godo.ListOptions{
-		Page:    gar.Page,
-		PerPage: gar.PerPage,
+		Page:    far.Page,
+		PerPage: far.PerPage,
 	}
 
 	ctx := context.TODO()
@@ -116,7 +116,7 @@ func (d *Droplet) GetAllDroplets(gar GetAllDropletsRequest) (*[]godo.Droplet, er
 		return nil, errors.New("Unable to get all databases. Godo error: " + err.Error())
 	}
 
-	return &droplets, nil
+	return droplets, nil
 }
 
 func (d *Droplet) GetDropletById(fdr FindDropletByIDRequest) (*godo.Droplet, error) {
