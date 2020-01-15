@@ -112,9 +112,9 @@ func TestGetById(t *testing.T) {
 	dbClient := NewDBC(TestPAT)
 	dbClient.client = &MockGodoDatabaseSvc{}
 	
-	expected := ExpectedDB
+	expected := &ExpectedDB
 	returned, _ := dbClient.GetById("1")
-	if !reflect.DeepEqual(&expected, returned) {
+	if !reflect.DeepEqual(expected, returned) {
 		t.Errorf("expected %+v\n returned %+v\n", expected, returned)
 	}
 
@@ -137,10 +137,10 @@ func TestCreateDatabaseCluster(t *testing.T) {
 
 	dbClient := NewDBC(TestPAT)
 	dbClient.client = &MockGodoDatabaseSvc{}
-	expected := ExpectedDB
+	expected := &ExpectedDB
 
 	returned, _ := dbClient.Create(TestCreateDatabaseClusterRequest)
-	if !reflect.DeepEqual(&expected, returned) {
+	if !reflect.DeepEqual(expected, returned) {
 		t.Errorf("expected %+v\n returned %+v\n", expected, returned)
 	}
 
@@ -196,9 +196,9 @@ func TestAddDatabaseToCluster(t *testing.T) {
 	dbClient := NewDBC(TestPAT)
 	dbClient.client = &MockGodoDatabaseSvc{}
 
-	expected := ExpectedDatabaseDB
+	expected := &ExpectedDatabaseDB
 	returned, _ := dbClient.AddDatabaseToCluster(TestCreateDatabaseRequest)
-	if !reflect.DeepEqual(&expected, returned) {
+	if !reflect.DeepEqual(expected, returned) {
 		t.Errorf("expected: %+v\n returned: %+v\n", expected, returned)
 	}
 
